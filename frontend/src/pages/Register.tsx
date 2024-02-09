@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useForm } from "react-hook-form";
 
 
 type RegisterFormData={
@@ -12,35 +13,19 @@ type RegisterFormData={
 
 const Register = () => {
 
-    const [formData,setFormData]=useState<RegisterFormData>({
-         firstName:"",
-         lastName:"",
-         email:"",
-         password:"",
-         confirmPassword:""
-    });
+
  
+    const {register,
+        watch,
+        handleSubmit,
+        formState:{errors}
+       }=useForm<RegisterFormData>();
 
 
+const fetchFormData = async (data:RegisterFormData)=>{
+    const {firstName,lastName,email,password}=data;
 
-    const handleInputChange=((e:React.ChangeEvent<HTMLInputElement>,field:keyof RegisterFormData)=>{
-        const value=e.target.value;
-       
-        setFormData((prevData)=>{
-           return {...prevData,[field]:value}
-        })
-
-    })
-
-
-
-
-
-    const handleForm=async()=>{
-        const {firstName,lastName,email,password}=formData;
-        if(formData.confirmPassword!==formData.password)return(alert("Password and Confirm Password must be same"))
-
-      const result=await fetch("http://localhost:3000/api/users/register",{
+    const result=await fetch("http://localhost:3000/api/users/register",{
         method:"POST",
         headers:{
             'Content-Type': 'application/json',
@@ -49,33 +34,25 @@ const Register = () => {
         
     });
 
-    const data=await result.json();
-    if(result.ok){
+}
 
 
-    console.log(data);
+
+const  handleFormData=handleSubmit ((data)=>{
+     fetchFormData(data)
+
+})
+
+
 
  
-    setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-      });
-   
-    }else{
-        alert(data.msg[0].msg)
-    }
-     
-    }
 
 
 
 
 
   return (
-    <form onSubmit={(e)=>e.preventDefault()}
+    <form onSubmit={handleFormData}
     className="flex flex-col gap-5">
    <h2 className="text-3xl font-bold">Create an Account</h2>
 
@@ -83,19 +60,22 @@ const Register = () => {
 
     <label className="text-gray-700 text-sm font-bold flex-1">
         First Name
-    <input onChange={(e)=>handleInputChange(e,"firstName")}
-     value={formData.firstName}
+    <input  {...register("firstName",{required:"Thie field is required"})}
     className="border rounded w-full py-1 px-2 font-normal"/>
-
+    {errors.firstName && (
+        <span className="text-red-500">{errors.firstName.message}</span>
+    )}
     </label>
 
     <label className="text-gray-700 text-sm font-bold flex-1">
         Last Name
 
-    <input onChange={(e)=>handleInputChange(e,"lastName")}
-     value={formData.lastName}
-    className="border rounded w-full py-1 px-2 font-normal" />
+    <input {...register("lastName",{required:"Thie field is required"})}
 
+    className="border rounded w-full py-1 px-2 font-normal" />
+         {errors.lastName && (
+        <span className="text-red-500">{errors.lastName.message}</span>
+    )}
     </label>
 
    </div>
@@ -103,35 +83,50 @@ const Register = () => {
    <label className="text-gray-700 text-sm font-bold flex-1">
         Email
 
-    <input onChange={(e)=>handleInputChange(e,"email")}
-    value={formData.email}
+    <input {...register("email",{required:"Thie field is required"})}
+
     type="email" 
     className="border rounded w-full py-1 px-2 font-normal"/>
-
+      {errors.email && (
+        <span className="text-red-500">{errors.email.message}</span>
+      )}
     </label>
 
     <label className="text-gray-700 text-sm font-bold flex-1">
         Password
 
-    <input onChange={(e)=>handleInputChange(e,"password")}
-    value={formData.password}
+    <input {...register("password",{required:"Thie field is required",minLength:{
+        value:6,
+        message:"Password must be 6 or more characters"
+    }})}
+
     type="password" 
     className="border rounded w-full py-1 px-2 font-normal"/>
-
+      {errors.password && (
+        <span className="text-red-500">{errors.password.message}</span>
+      )}
     </label>
   
     <label className="text-gray-700 text-sm font-bold flex-1">
         Confirm Password
 
-   <input onChange={(e)=>handleInputChange(e,"confirmPassword")}
-   value={formData.confirmPassword}
+   <input {...register("confirmPassword",{
+         validate:(val)=>{
+          if(!val){
+            return "This field is required"
+          }else if(watch("password")!=val){
+            return "password must be same"
+          }
+   }})}
    type="password" 
    className="border rounded w-full py-1 px-2 font-normal" />
-
+     {errors.confirmPassword && (
+        <span className="text-red-500">{errors.confirmPassword.message}</span>
+     )}
     </label>
 
     <span>
-        <button onClick={handleForm}
+        <button 
         className="bg-blue-600 text-white p-2 font-bold hover:bg-blue-500 text-xl ">Create Account</button>
     </span>
 

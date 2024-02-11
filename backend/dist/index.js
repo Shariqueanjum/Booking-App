@@ -21,7 +21,11 @@ const auth_1 = __importDefault(require("./routes/auth"));
 const app = (0, express_1.default)();
 const port = 3000;
 dotenv_1.default.config();
-app.use((0, cors_1.default)());
+app.use((0, cors_1.default)({
+    origin: "http://localhost:5173",
+    credentials: true,
+    exposedHeaders: ['Content-Type', 'Authorization'],
+}));
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 app.use("/api/users", users_1.default);

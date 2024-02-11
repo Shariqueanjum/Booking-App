@@ -10,7 +10,14 @@ const port=3000;
 
 dotenv.config();
 
-app.use(cors());
+app.use(cors({
+  origin:"http://localhost:5173",
+  credentials: true,
+  exposedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+
+
 app.use(express.json());
 app.use(express.urlencoded({extended:true}))
 

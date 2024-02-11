@@ -1,8 +1,10 @@
 
 import { useForm } from "react-hook-form";
+import * as apiClient from "../api-fetch";
+import { useMutation } from "react-query";
 
 
-type RegisterFormData={
+export type RegisterFormData={
     firstName:string,
     lastName:string,
     email:string,
@@ -22,24 +24,20 @@ const Register = () => {
        }=useForm<RegisterFormData>();
 
 
-const fetchFormData = async (data:RegisterFormData)=>{
-    const {firstName,lastName,email,password}=data;
-
-    const result=await fetch("http://localhost:3000/api/users/register",{
-        method:"POST",
-        headers:{
-            'Content-Type': 'application/json',
-        },
-        body:JSON.stringify({firstName,lastName,email,password})
-        
-    });
-
-}
+    const mutation=useMutation(apiClient.register,{
+       onSuccess:()=>{
+        console.log("Registered Successfully")
+       },
+       onError:(error:Error)=>{
+             console.log(error.message)
+       }
+       
+    })
+   
 
 
-
-const  handleFormData=handleSubmit ((data)=>{
-     fetchFormData(data)
+const  handleFormData=handleSubmit ( (data)=>{
+      mutation.mutate(data);
 
 })
 
